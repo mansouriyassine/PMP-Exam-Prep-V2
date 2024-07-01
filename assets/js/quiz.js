@@ -1,9 +1,9 @@
-// quiz.js - Updated to work with revised JSON structure
-
 let questions = [];
 let currentQuestionIndex = 0;
+let userAnswers = [];
+let timeLeft = 600; // 10 minutes in seconds
+let timerInterval;
 
-// Function to parse URL parameters
 function getUrlParameter(name) {
     name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
     let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -11,105 +11,115 @@ function getUrlParameter(name) {
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
-// Fetch questions based on selected group
 function fetchQuestions(group) {
-    console.log('Fetching questions for group:', group);
     return fetch(`questions/group${group}.json`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            console.log('Fetch response:', response);
             return response.json();
         })
         .then(data => {
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('Invalid or empty question data');
             }
-            console.log('Fetched data:', data);
             questions = data;
             startQuiz();
         })
         .catch(error => {
             console.error('Error fetching questions:', error);
-            document.getElementById('question-container').innerHTML = `<p>Error loading questions: ${error.message}. Please try again.</p>`;
+            document.getElementById('quiz-container').innerHTML = `<p>Error loading questions: ${error.message}. Please try again.</p>`;
         });
 }
 
 function startQuiz() {
-    console.log('Starting quiz with questions:', questions);
+    userAnswers = new Array(questions.length).fill(null);
     showQuestion(questions[currentQuestionIndex]);
+    startTimer();
 }
 
 function showQuestion(question) {
-    const questionContainer = document.getElementById('question-container');
-    const choices = [
-        question.choice1,
-        question.choice2,
-        question.choice3,
-        question.choice4
-    ];
-    questionContainer.innerHTML = `
-        <h2>Question ${currentQuestionIndex + 1} of ${questions.length}</h2>
-        <h3>${question.question}</h3>
-        ${choices.map((choice, index) => `
-            <button onclick="selectAnswer(${index})">${choice}</button>
-        `).join('')}
-    `;
+    document.getElementById('question').textContent = question.question;
+    const choicesContainer = document.getElementById('choices');
+    choicesContainer.innerHTML = '';
+    const choices = [question.choice1, question.choice2, question.choice3, question.choice4];
+    choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.className = 'w-full text-left px-4 py-2 border rounded mb-2 hover:bg-gray-100';
+        button.textContent = choice;
+        button.onclick = () => selectAnswer(index);
+        choicesContainer.appendChild(button);
+    });
+    updateNavigationButtons();
+    updateProgressBar();
 }
 
-window.selectAnswer = function(selectedIndex) {
-    const currentQuestion = questions[currentQuestionIndex];
-    currentQuestion.userAnswer = selectedIndex + 1; // Adjust for 1-based indexing in answers
-    if (selectedIndex + 1 === currentQuestion.answer) {
-        alert('Correct!');
+function selectAnswer(selectedIndex) {
+    userAnswers[currentQuestionIndex] = selectedIndex + 1;
+    updateNavigationButtons();
+}
+
+function updateNavigationButtons() {
+    document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+    const nextBtn = document.getElementById('next-btn');
+    if (currentQuestionIndex === questions.length - 1) {
+        nextBtn.textContent = 'Finish';
+        nextBtn.onclick = finishQuiz;
     } else {
-        const correctChoiceKey = `choice${currentQuestion.answer}`;
-        alert(`Wrong! The correct answer was: ${currentQuestion[correctChoiceKey]}`);
+        nextBtn.textContent = 'Next';
+        nextBtn.onclick = () => {
+            currentQuestionIndex++;
+            showQuestion(questions[currentQuestionIndex]);
+        };
     }
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-        showQuestion(questions[currentQuestionIndex]);
-    } else {
-        handleQuizCompletion();
-    }
-};
-
-function handleQuizCompletion() {
-    const score = questions.reduce((acc, q) => acc + (q.userAnswer === q.answer ? 1 : 0), 0);
-    const percentage = (score / questions.length) * 100;
-    const resultMessage = `Quiz completed! Your score: ${score}/${questions.length} (${percentage.toFixed(2)}%)`;
-    
-    console.log(resultMessage);
-    alert(resultMessage);
-
-    // Display results in the question container
-    const questionContainer = document.getElementById('question-container');
-    questionContainer.innerHTML = `
-        <h2>Quiz Results</h2>
-        <p>${resultMessage}</p>
-        <button onclick="restartQuiz()">Restart Quiz</button>
-    `;
-    
-    // You can add logic here to save the score or redirect to a results page
-    // For example: window.location.href = `results.html?score=${score}&total=${questions.length}`;
 }
 
-function restartQuiz() {
-    currentQuestionIndex = 0;
-    questions.forEach(q => delete q.userAnswer);
-    startQuiz();
+function updateProgressBar() {
+    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
+    document.getElementById('question-progress').textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
 }
 
-// Main logic to start quiz based on selected group
+function startTimer() {
+    const timerElement = document.getElementById('timer');
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+        } else {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            timeLeft--;
+        }
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    const score = calculateScore();
+    const timeTaken = 600 - timeLeft;
+    window.location.href = `results.html?score=${score}&total=${questions.length}&time=${timeTaken}&answers=${JSON.stringify(userAnswers)}`;
+}
+
+function calculateScore() {
+    return userAnswers.reduce((score, answer, index) => {
+        return score + (answer === questions[index].answer ? 1 : 0);
+    }, 0);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM content loaded');
     const selectedGroup = getUrlParameter('group');
-    console.log('Selected group:', selectedGroup);
     if (selectedGroup) {
         fetchQuestions(selectedGroup);
     } else {
-        console.error('No group selected');
-        document.getElementById('question-container').innerHTML = `<p>No group selected. Please go back and choose a group.</p>`;
+        document.getElementById('quiz-container').innerHTML = `<p>No group selected. Please go back and choose a group.</p>`;
     }
 });
+
+document.getElementById('prev-btn').onclick = () => {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        showQuestion(questions[currentQuestionIndex]);
+    }
+};
