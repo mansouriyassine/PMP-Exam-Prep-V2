@@ -34,26 +34,24 @@ function fetchQuestions(group) {
 
 function startQuiz() {
     userAnswers = new Array(questions.length).fill(null);
-    showQuestion();
+    showQuestion(questions[currentQuestionIndex]);
     startTimer();
 }
 
-function showQuestion() {
-    const question = questions[currentQuestionIndex];
+function showQuestion(question) {
     document.getElementById('question').textContent = question.question;
     const choicesContainer = document.getElementById('choices');
     choicesContainer.innerHTML = '';
     const choices = [question.choice1, question.choice2, question.choice3, question.choice4];
     choices.forEach((choice, index) => {
         const button = document.createElement('button');
-        button.className = 'w-full text-left px-4 py-2 border rounded mb-2 transition-colors duration-200';
-        if (userAnswers[currentQuestionIndex] === index + 1) {
-            button.classList.add('bg-gray-300');
-        } else {
-            button.classList.add('hover:bg-gray-100');
-        }
+        button.className = 'w-full text-left px-4 py-2 border rounded mb-2 hover:bg-gray-100';
         button.textContent = choice;
         button.onclick = () => selectAnswer(index);
+        // Highlight the button if it was previously selected
+        if (userAnswers[currentQuestionIndex] === index + 1) {
+            button.classList.add('selected-choice');
+        }
         choicesContainer.appendChild(button);
     });
     updateNavigationButtons();
@@ -61,8 +59,16 @@ function showQuestion() {
 }
 
 function selectAnswer(selectedIndex) {
+    // Remove 'selected-choice' class from all choice buttons
+    const choicesContainer = document.getElementById('choices');
+    const choiceButtons = choicesContainer.getElementsByTagName('button');
+    for (let i = 0; i < choiceButtons.length; i++) {
+        choiceButtons[i].classList.remove('selected-choice');
+    }
+    // Add 'selected-choice' class to the clicked button
+    choiceButtons[selectedIndex].classList.add('selected-choice');
+    // Store the selected answer
     userAnswers[currentQuestionIndex] = selectedIndex + 1;
-    showQuestion(); // Redraw the question to update highlighting
     updateNavigationButtons();
 }
 
@@ -76,7 +82,7 @@ function updateNavigationButtons() {
         nextBtn.textContent = 'Next';
         nextBtn.onclick = () => {
             currentQuestionIndex++;
-            showQuestion();
+            showQuestion(questions[currentQuestionIndex]);
         };
     }
 }
@@ -127,6 +133,6 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('prev-btn').onclick = () => {
     if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
-        showQuestion();
+        showQuestion(questions[currentQuestionIndex]);
     }
 };
