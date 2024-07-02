@@ -34,48 +34,36 @@ function fetchQuestions(group) {
 
 function startQuiz() {
     userAnswers = new Array(questions.length).fill(null);
-    showQuestion(questions[currentQuestionIndex]);
+    showQuestion();
     startTimer();
 }
 
-function showQuestion(question) {
+function showQuestion() {
+    const question = questions[currentQuestionIndex];
     document.getElementById('question').textContent = question.question;
     const choicesContainer = document.getElementById('choices');
     choicesContainer.innerHTML = '';
     const choices = [question.choice1, question.choice2, question.choice3, question.choice4];
     choices.forEach((choice, index) => {
         const button = document.createElement('button');
-        button.className = 'w-full text-left px-4 py-2 border rounded mb-2 hover:bg-gray-100 transition-colors duration-200';
+        button.className = 'w-full text-left px-4 py-2 border rounded mb-2 transition-colors duration-200';
+        if (userAnswers[currentQuestionIndex] === index + 1) {
+            button.classList.add('bg-gray-300');
+        } else {
+            button.classList.add('hover:bg-gray-100');
+        }
         button.textContent = choice;
         button.onclick = () => selectAnswer(index);
         choicesContainer.appendChild(button);
     });
     updateNavigationButtons();
     updateProgressBar();
-    
-    // Highlight the previously selected answer, if any
-    if (userAnswers[currentQuestionIndex] !== null) {
-        highlightSelectedAnswer(userAnswers[currentQuestionIndex] - 1);
-    }
 }
 
 function selectAnswer(selectedIndex) {
     userAnswers[currentQuestionIndex] = selectedIndex + 1;
-    highlightSelectedAnswer(selectedIndex);
+    showQuestion(); // Redraw the question to update highlighting
     updateNavigationButtons();
-}
-
-function highlightSelectedAnswer(selectedIndex) {
-    const choiceButtons = document.querySelectorAll('#choices button');
-    choiceButtons.forEach((button, index) => {
-        if (index === selectedIndex) {
-            button.classList.add('bg-gray-300');
-            button.classList.remove('hover:bg-gray-100');
-        } else {
-            button.classList.remove('bg-gray-300');
-            button.classList.add('hover:bg-gray-100');
-        }
-    });
 }
 
 function updateNavigationButtons() {
@@ -88,7 +76,7 @@ function updateNavigationButtons() {
         nextBtn.textContent = 'Next';
         nextBtn.onclick = () => {
             currentQuestionIndex++;
-            showQuestion(questions[currentQuestionIndex]);
+            showQuestion();
         };
     }
 }
@@ -139,6 +127,6 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('prev-btn').onclick = () => {
     if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
-        showQuestion(questions[currentQuestionIndex]);
+        showQuestion();
     }
 };
