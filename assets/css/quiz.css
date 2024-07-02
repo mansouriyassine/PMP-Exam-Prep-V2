@@ -18,5 +18,5 @@ button {
 
 .selected-choice {
     background-color: #E5E7EB !important;
-    color: black;
+    color: black !important;
 }

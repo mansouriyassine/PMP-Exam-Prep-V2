@@ -51,7 +51,6 @@ function showQuestion(question) {
         // Highlight the button if it was previously selected
         if (userAnswers[currentQuestionIndex] === index + 1) {
             button.classList.add('selected-choice');
-            button.style.backgroundColor = '#E5E7EB'; // Light grey color
         }
         choicesContainer.appendChild(button);
     });
@@ -65,12 +64,10 @@ function selectAnswer(selectedIndex) {
     const choiceButtons = choicesContainer.getElementsByTagName('button');
     Array.from(choiceButtons).forEach(button => {
         button.classList.remove('selected-choice');
-        button.style.backgroundColor = '';
     });
 
     // Set grey background to the clicked button
     choiceButtons[selectedIndex].classList.add('selected-choice');
-    choiceButtons[selectedIndex].style.backgroundColor = '#E5E7EB'; // Light grey color
 
     // Store the selected answer
     userAnswers[currentQuestionIndex] = selectedIndex + 1;
