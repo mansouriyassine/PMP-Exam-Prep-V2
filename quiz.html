@@ -13,7 +13,7 @@
     >
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
-<body class="bg-white font-manrope">
+<body class="bg-white font-manrope flex flex-col min-h-screen">
     <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f4] px-10 py-3">
         <div class="flex items-center gap-4 text-[#111418]">
             <img src="assets/images/logo.png" alt="PMP Exam Prep Logo" class="h-10">
@@ -30,8 +30,8 @@
         </nav>
     </header>
 
-    <main class="container mx-auto px-4 py-8">
-        <div id="quiz-container">
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div id="quiz-container" class="max-w-3xl mx-auto">
             <div class="mb-4 flex justify-between items-center">
                 <div id="question-progress" class="text-lg font-semibold"></div>
                 <div id="timer" class="text-lg font-semibold">10:00</div>
