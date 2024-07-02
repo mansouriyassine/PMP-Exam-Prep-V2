@@ -60,15 +60,9 @@ function showQuestion(question) {
 }
 
 function selectAnswer(selectedIndex) {
-    // Remove 'selected-choice' class and grey background from all choice buttons
+    // Set grey background to the clicked button
     const choicesContainer = document.getElementById('choices');
     const choiceButtons = choicesContainer.getElementsByTagName('button');
-    for (let i = 0; i < choiceButtons.length; i++) {
-        choiceButtons[i].classList.remove('selected-choice');
-        choiceButtons[i].style.backgroundColor = ''; // Reset background color
-    }
-    
-    // Add 'selected-choice' class and set grey background to the clicked button
     choiceButtons[selectedIndex].classList.add('selected-choice');
     choiceButtons[selectedIndex].style.backgroundColor = '#E5E7EB'; // Light grey color
     
