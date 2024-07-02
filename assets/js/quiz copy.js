@@ -52,28 +52,11 @@ function showQuestion(question) {
     });
     updateNavigationButtons();
     updateProgressBar();
-    
-    // Highlight the previously selected answer, if any
-    if (userAnswers[currentQuestionIndex] !== null) {
-        highlightSelectedAnswer(userAnswers[currentQuestionIndex] - 1);
-    }
 }
 
 function selectAnswer(selectedIndex) {
     userAnswers[currentQuestionIndex] = selectedIndex + 1;
-    highlightSelectedAnswer(selectedIndex);
     updateNavigationButtons();
-}
-
-function highlightSelectedAnswer(selectedIndex) {
-    const choiceButtons = document.querySelectorAll('#choices button');
-    choiceButtons.forEach((button, index) => {
-        if (index === selectedIndex) {
-            button.classList.add('bg-gray-300');
-        } else {
-            button.classList.remove('bg-gray-300');
-        }
-    });
 }
 
 function updateNavigationButtons() {
