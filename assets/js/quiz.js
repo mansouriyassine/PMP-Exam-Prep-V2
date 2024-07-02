@@ -45,7 +45,7 @@ function showQuestion(question) {
     const choices = [question.choice1, question.choice2, question.choice3, question.choice4];
     choices.forEach((choice, index) => {
         const button = document.createElement('button');
-        button.className = 'w-full text-left px-4 py-2 border rounded mb-2 hover:bg-gray-100';
+        button.className = 'w-full text-left px-4 py-2 border rounded mb-2 hover:bg-gray-100 transition-colors duration-200';
         button.textContent = choice;
         button.onclick = () => selectAnswer(index);
         choicesContainer.appendChild(button);
@@ -70,8 +70,10 @@ function highlightSelectedAnswer(selectedIndex) {
     choiceButtons.forEach((button, index) => {
         if (index === selectedIndex) {
             button.classList.add('bg-gray-300');
+            button.classList.remove('hover:bg-gray-100');
         } else {
             button.classList.remove('bg-gray-300');
+            button.classList.add('hover:bg-gray-100');
         }
     });
 }
