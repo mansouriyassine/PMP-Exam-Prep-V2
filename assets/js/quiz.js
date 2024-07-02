@@ -51,6 +51,7 @@ function showQuestion(question) {
         // Highlight the button if it was previously selected
         if (userAnswers[currentQuestionIndex] === index + 1) {
             button.classList.add('selected-choice');
+            button.style.backgroundColor = '#E5E7EB'; // Light grey color
         }
         choicesContainer.appendChild(button);
     });
@@ -59,14 +60,18 @@ function showQuestion(question) {
 }
 
 function selectAnswer(selectedIndex) {
-    // Remove 'selected-choice' class from all choice buttons
+    // Remove 'selected-choice' class and grey background from all choice buttons
     const choicesContainer = document.getElementById('choices');
     const choiceButtons = choicesContainer.getElementsByTagName('button');
     for (let i = 0; i < choiceButtons.length; i++) {
         choiceButtons[i].classList.remove('selected-choice');
+        choiceButtons[i].style.backgroundColor = ''; // Reset background color
     }
-    // Add 'selected-choice' class to the clicked button
+    
+    // Add 'selected-choice' class and set grey background to the clicked button
     choiceButtons[selectedIndex].classList.add('selected-choice');
+    choiceButtons[selectedIndex].style.backgroundColor = '#E5E7EB'; // Light grey color
+    
     // Store the selected answer
     userAnswers[currentQuestionIndex] = selectedIndex + 1;
     updateNavigationButtons();
